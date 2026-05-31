@@ -1,0 +1,11 @@
+{
+  "prompt_management_disabled": {
+    "region": "eu-west-1",
+    "prompt_id": "<<TODO>>",
+    "param_name_version": "<<TODO>>"
+  },
+
+  "prompt_management": {
+    "system_prompt_path": "agent/config/prompt.txt"
+  }
+}

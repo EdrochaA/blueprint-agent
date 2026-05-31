@@ -1,0 +1,42 @@
+{
+  "runtime_deployment": {
+    "agent_name": "recruitment_agent",
+    "region": "eu-west-1",
+    "entrypoint": "agent/main.py",
+    "requirements_file": "pyproject.toml",
+    "memory_mode": "NO_MEMORY",
+    "auto_create_execution_role": true,
+    "auto_create_ecr": true,
+    "identity_config": {
+      "request_header_configuration": {
+        "requestHeaderAllowlist": ["Authorization"]
+      }
+    },
+    "auto_update_on_conflict": true
+  },
+  "guardrails_config": {
+    "guardrail_name": "recruitment_agent_guardrail",
+    "guardrail_description": "<<TODO>>",
+    "guardrail_blocked_input_message": "Your message was blocked by the content policy.",
+    "guardrail_blocked_output_message": "The response was blocked by the content policy.",
+    "guardrail_filter_strength": "<<TODO>>",
+    "guardrail_id_ssm_parameter_name": "<<TODO>>",
+    "guardrail_version_ssm_parameter_name": "<<TODO>>"
+  },
+  "gateway_config": {
+    "name": "recruitment-agent-gateway",
+    "description": "Gateway for the recruitment agent",
+    "protocol_type": "MCP",
+    "authorizer_type": "CUSTOM_JWT",
+    "create_role": false,
+    "role_name": "recruitment-agent-gateway-role",
+    "ssm_parameter_name": "/recruitment-agent/gateway-id"
+  },
+  "mcp_targets": [
+    {
+      "name": "deepwiki-target",
+      "mcp_server_url": "https://mcp.deepwiki.com/mcp",
+      "auth_type": "NoAuth"
+    }
+  ]
+}

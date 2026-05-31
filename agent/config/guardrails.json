@@ -1,0 +1,13 @@
+{
+  "guardrails": {
+    "guardrail_id_ssm_parameter_name": "<<TODO>>",
+    "guardrail_version_ssm_parameter_name": "<<TODO>>",
+    "guardrail_trace": "enabled",
+    "guardrail_stream_processing_mode": null,
+    "guardrail_redact_input": null,
+    "guardrail_redact_input_message": null,
+    "guardrail_redact_output": null,
+    "guardrail_redact_output_message": null,
+    "guardrail_latest_message": null
+  }
+}

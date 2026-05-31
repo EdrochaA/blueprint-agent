@@ -1,0 +1,54 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "blueprint-agent-image"
+
+phases:
+  install:
+    commands:
+      - sudo dnf install -y dnf-plugins-core
+      - sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+      - sudo dnf -y install terraform
+      - terraform version
+      
+      - git config --global credential.helper '!aws codecommit credential-helper $@'
+      - git config --global credential.UseHttpPath true
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR"
+      - aws --version
+      - docker --version
+
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - aws ecr get-login-password --region $AWS_REGION |
+        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - echo "Setting up Docker Buildx for ARM64 builds"
+
+      - docker buildx create --name arm64builder --use || docker buildx use arm64builder
+      - docker buildx inspect --bootstrap
+
+  build:
+    commands:
+      - echo "Building Docker image for ARM64"
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
+      - REGISTRY=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - IMAGE_URI=$REGISTRY/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - LATEST_URI=$REGISTRY/$IMAGE_REPO_NAME:latest
+
+      - docker buildx build --platform linux/arm64 --load -t $IMAGE_URI -t $LATEST_URI .
+      - docker push $IMAGE_URI
+      - docker push $LATEST_URI 
+      
+      - export TF_VAR_ecr_image_uri=$IMAGE_URI
+
+      - cd terraform
+      - terraform init -input=false
+      - terraform apply -auto-approve -input=false
+
+  post_build:
+    commands:
+      - echo "ARM64 image pushed successfully"
+      - echo "Image URI:" $IMAGE_URI

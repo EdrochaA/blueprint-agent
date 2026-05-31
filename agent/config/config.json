@@ -1,0 +1,42 @@
+{
+  "llm": {
+    "connection": {
+      "region_name": "eu-west-1",
+      "endpoint_url": null
+    },
+    "model": {
+      "model_id": "eu.anthropic.claude-sonnet-4-6",
+      "max_tokens": null,
+      "temperature": 0.3,
+      "top_p": null
+    }
+  },
+  
+  "agent": {
+    "metadata": {
+      "agent_id": "recruitment_agent",
+      "name": "Recruitment Agent",
+      "description": "An agent specialized in recruitment tasks"
+    }
+  },
+
+  "gateway": {
+    "ssm_parameter_name": "/recruitment-agent/gateway-id",
+    "mcp_target_name": ""
+  },
+
+  "memory": {
+    "enable_stm": false,
+    "enable_ltm": false,
+    "memory_id": "asa_orchestrator_stm_ltm-dTlZRZ3Bpj",
+    "stm_k": 5,
+    "ltm_top_k": 3,
+    "min_relevance_score": 0.3,
+    "ltm_namespaces": [
+      "asa/user/{actorId}/preferences/",
+      "asa/user/{actorId}/semantic/"
+    ],
+    "user_query_delimiter": "[Consulta actual del usuario]",
+    "ltm_header": "[Contexto de memoria a largo plazo del usuario]"
+  }
+}
