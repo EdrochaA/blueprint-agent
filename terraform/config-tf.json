@@ -26,10 +26,7 @@
   "gateway_config": {
     "name": "recruitment-agent-gateway",
     "description": "Gateway for the recruitment agent",
-    "protocol_type": "MCP",
-    "authorizer_type": "CUSTOM_JWT",
-    "create_role": false,
-    "role_name": "recruitment-agent-gateway-role",
+    "authorizer_type": "NONE",
     "ssm_parameter_name": "/recruitment-agent/gateway-id"
   },
   "mcp_targets": []

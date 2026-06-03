@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_secretsmanager_secret" "identity_config" {
   count = local.enable_identity ? 1 : 0
-  name  = "IDENTITY_CONFIG_COGNITO"
+  name  = "IDENTITY_CONFIG_COGNITO_AMPLIFY"
 }
 
 data "aws_secretsmanager_secret_version" "identity_config" {
@@ -29,22 +29,14 @@ locals {
   guardrails_filter_strength            = local.guardrails_config != null ? try(local.config.guardrails_config.guardrail_filter_strength, "HIGH") : "HIGH"
   guardrails_id_ssm_parameter_name      = local.guardrails_config != null ? try(local.config.guardrails_config.guardrail_id_ssm_parameter_name, "") : ""
   guardrails_version_ssm_parameter_name = local.guardrails_config != null ? try(local.config.guardrails_config.guardrail_version_ssm_parameter_name, "") : ""
+  
   # Gateway: use existing if gateway.gateway_id is present, create new otherwise
   gateway_config      = try(local.config.gateway_config, null)
   gateway_existing_id = try(local.config.gateway_config.gateway_id, null)
   gateway_map         = local.gateway_config != null ? { "gw" = local.gateway_config } : {}
 
-  # role_arn: only computed when gateway_config is present
-  gateway_role_arn = local.gateway_config != null ? try(
-    local.gateway_config.role_arn,
-    "arn:aws:iam::${local.account_id}:role/${local.gateway_config.role_name}"
-  ) : null
-
   # MCP Targets: only created if mcp_targets section is present
   mcp_target_config = try(local.config.mcp_targets, null)
-
-  # SSM parameter name for gateway_id
-  gateway_ssm_parameter_name = try(local.gateway_config.ssm_parameter_name, null)
 
   # Identity: retrieve discoveryUrl and allowedClients from Secrets Manager (only when enable_identity = true)
   identity_secret          = local.enable_identity ? jsondecode(data.aws_secretsmanager_secret_version.identity_config[0].secret_string) : null
@@ -60,8 +52,9 @@ locals {
     }
   } : null
 }
+
 module "agentcore_runtime" {
-  source = "git::https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/cc-swp-terraform-module-agentcore-runtime?ref=develop"
+  source = "git::https://github.com/EdrochaA/runtime-module.git?ref=develop"
 
   aws_region                  = local.config.runtime_deployment.region
   ecr_image_uri               = var.ecr_image_uri
@@ -84,18 +77,15 @@ module "agentcore_runtime" {
 module "agentcore_gateway" {
   for_each = local.gateway_map
 
-  source = "git::https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/cc-swp-terraform-module-agentcore-gateway?ref=develop"
+  source = "git::https://github.com/EdrochaA/gateway-module.git?ref=develop"
 
   aws_region                 = local.config.runtime_deployment.region
   agentcore_gateway_name     = try(each.value.name, null)
   existing_gateway_id        = local.gateway_existing_id
   authorizer_type            = try(each.value.authorizer_type, "NONE")
-  protocol_type              = try(each.value.protocol_type, "MCP")
   description                = try(each.value.description, "")
-  create_role                = try(each.value.create_role, false)
-  role_name                  = try(each.value.role_name, null)
-  role_arn                   = try(each.value.role_arn, local.gateway_role_arn)
+  role_name                  = "${each.value.name}-role"
   authorizer_configuration   = try(each.value.authorizer_type, null) == "CUSTOM_JWT" ? local.gateway_identity_authorizer_configuration : null
   mcp_target_config          = local.mcp_target_config
-  gateway_ssm_parameter_name = try(each.value.ssm_parameter_name, local.gateway_ssm_parameter_name)
+  gateway_ssm_parameter_name = each.value.ssm_parameter_name
 }
