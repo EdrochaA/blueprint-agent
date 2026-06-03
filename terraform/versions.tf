@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "s3-swp-terraform-tfstate"
+    bucket = "s3-terraform-tfstate-ai-recruitment"
     key    = "blueprint-agent/terraform.tfstate"
     region = "eu-west-1"
   }
@@ -17,5 +17,4 @@ terraform {
 
 provider "aws" {
   region = local.config.runtime_deployment.region
-  #profile = "swisspost"
 }
