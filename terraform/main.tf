@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_secretsmanager_secret" "identity_config" {
   count = local.enable_identity ? 1 : 0
-  name  = "IDENTITY_CONFIG_COGNITO_AMPLIFY"
+  name  = "IDENTITY_CONFIG_COGNITO"
 }
 
 data "aws_secretsmanager_secret_version" "identity_config" {
