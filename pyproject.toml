@@ -1,7 +1,7 @@
 [project]
-name = "<<TODO>>"
+name = "blueprint-agent"
 version = "0.1.0"
-description = "<<TODO>>"
+description = "Project for the recruitment agent"
 requires-python = "~=3.12.0"
 
 dependencies = [
