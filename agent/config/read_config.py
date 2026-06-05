@@ -1,4 +1,5 @@
 import json
+import os
 import boto3
 from .config_dto import AgentLLMConfigDTO, GatewayConfig, LLMConfig, AgentConfig, MemoryConfig
 
@@ -67,7 +68,7 @@ def read_config(config_path: str = "config/config.json") -> AgentLLMConfigDTO:
     memory = data.get("memory", {})
 
     llm_config = LLMConfig(
-        model_id=model.get("model_id"),
+        model_id=os.getenv("BEDROCK_MODEL_ID") or model.get("model_id"),
         region_name=connection.get("region_name"),
         endpoint_url=connection.get("endpoint_url"),
         max_tokens=model.get("max_tokens"),
