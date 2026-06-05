@@ -6,6 +6,13 @@ from .guardrails_dto import GuardrailsConfigDTO
 logger = logging.getLogger("blueprint-agent-memory")
 
 
+def _normalize_ssm_parameter_name(param_name: str) -> str:
+    normalized = (param_name or "").strip()
+    if "/" in normalized and not normalized.startswith("/"):
+        normalized = f"/{normalized}"
+    return normalized
+
+
 def _get_ssm_parameter(param_name: str, region: str) -> str:
     """Fetch a string value from AWS SSM Parameter Store.
 
@@ -20,14 +27,15 @@ def _get_ssm_parameter(param_name: str, region: str) -> str:
         ValueError: If the parameter is not found.
         RuntimeError: On any other SSM error.
     """
+    normalized_name = _normalize_ssm_parameter_name(param_name)
     ssm_client = boto3.client("ssm", region_name=region)
     try:
-        response = ssm_client.get_parameter(Name=param_name)
+        response = ssm_client.get_parameter(Name=normalized_name)
         return response["Parameter"]["Value"].strip()
     except ssm_client.exceptions.ParameterNotFound:
-        raise ValueError(f"SSM parameter '{param_name}' not found in region '{region}'.")
+        raise ValueError(f"SSM parameter '{normalized_name}' not found in region '{region}'.")
     except Exception as e:
-        raise RuntimeError(f"Error fetching SSM parameter '{param_name}': {e}") from e
+        raise RuntimeError(f"Error fetching SSM parameter '{normalized_name}': {e}") from e
 
 
 def is_guardrails_enabled(config_path: str = "agent/config/guardrails.json") -> bool:

@@ -1,7 +1,7 @@
 {
   "guardrails": {
-    "guardrail_id_ssm_parameter_name": "recruitment-agent/guardrail-id",
-    "guardrail_version_ssm_parameter_name": "recruitment-agent/guardrail-version",
+    "guardrail_id_ssm_parameter_name": "/recruitment-agent/guardrail-id",
+    "guardrail_version_ssm_parameter_name": "/recruitment-agent/guardrail-version",
     "guardrail_trace": "enabled",
     "guardrail_stream_processing_mode": null,
     "guardrail_redact_input": null,
