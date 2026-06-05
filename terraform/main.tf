@@ -63,6 +63,7 @@ module "agentcore_runtime" {
   jwt_discovery_url           = local.identity_discovery_url
   jwt_allowed_clients         = local.identity_allowed_clients
   request_header_allowlist    = local.enable_identity ? try(local.config.runtime_deployment.identity_config.request_header_configuration.requestHeaderAllowlist, []) : []
+  runtime_cross_account_principals = try(local.config.runtime_deployment.cross_account_principals, [])
 
   # Guardrail — only created when guardrails_config is present in config-tf.json
   guardrail_name                        = local.guardrails_name
